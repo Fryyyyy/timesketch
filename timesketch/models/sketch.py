@@ -802,6 +802,7 @@ class DataSource(LabelMixin, StatusMixin, CommentMixin, BaseModel):
     data_label = Column(UnicodeText())
     error_message = Column(UnicodeText())
     total_file_events = Column(BigInteger())
+    total_file_warnings = Column(BigInteger())
 
     def __init__(
         self,
@@ -815,6 +816,7 @@ class DataSource(LabelMixin, StatusMixin, CommentMixin, BaseModel):
         data_label,
         error_message="",
         total_file_events=0,
+        total_file_warnings=0,
     ):  # pylint: disable=too-many-arguments
         """Initialize the DataSource object.
 
@@ -841,9 +843,14 @@ class DataSource(LabelMixin, StatusMixin, CommentMixin, BaseModel):
         self.data_label = data_label
         self.error_message = error_message
         self.total_file_events = total_file_events
+        self.total_file_warnings = total_file_warnings
 
     def set_total_file_events(self, total_file_events):
         self.total_file_events = total_file_events
+        db_session.commit()
+
+    def set_total_file_warnings(self, total_file_warnings):
+        self.total_file_warnings = total_file_warnings
         db_session.commit()
 
     def set_error_message(self, error_message):
@@ -853,6 +860,10 @@ class DataSource(LabelMixin, StatusMixin, CommentMixin, BaseModel):
     @property
     def get_total_file_events(self):
         return self.total_file_events
+
+    @property
+    def get_total_file_warnings(self):
+        return self.total_file_warnings
 
     @property
     def get_file_on_disk(self):

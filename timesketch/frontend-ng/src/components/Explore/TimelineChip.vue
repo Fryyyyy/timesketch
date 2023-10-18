@@ -62,6 +62,9 @@ limitations under the License.
               <li>
                 <strong>Total File Events:</strong>{{ totalEventsDatasource(datasource.file_on_disk) | compactNumber }}
               </li>
+              <li>
+                <strong>Total File Warnings:</strong>{{ totalWarningsDatasource(datasource.file_on_disk) | compactNumber }}
+              </li>
               <li v-if="dataSourceStatus(datasource) === 'fail'">
                 <strong>Error message:</strong>
                 <code v-if="datasource.error_message"> {{ datasource.error_message }}</code>
@@ -233,6 +236,10 @@ limitations under the License.
                     <li>
                       <strong>Total File Events: </strong
                       >{{ totalEventsDatasource(datasource.file_on_disk) | compactNumber }}
+                    </li>
+                    <li>
+                      <strong>Total File Warnings:</strong
+                      >{{ totalWarningsDatasource(datasource.file_on_disk) | compactNumber }}
                     </li>
                     <li v-if="dataSourceStatus(datasource) === 'fail'">
                       <strong>Error message:</strong>
@@ -523,6 +530,9 @@ export default {
     },
     totalEventsDatasource(fileOnDisk) {
       return this.datasources.find((x) => x.file_on_disk === fileOnDisk).total_file_events
+    },
+    totalWarningsDatasource(fileOnDisk) {
+      return this.datasources.find((x) => x.file_on_disk === fileOnDisk).total_file_warnings
     },
   },
   created() {

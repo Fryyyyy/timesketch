@@ -210,11 +210,13 @@ def _set_datasource_status(timeline_id, file_path, status, error_message=None):
     raise KeyError(f"No datasource find in the timeline with file_path: {file_path}")
 
 
-def _set_datasource_total_events(timeline_id, file_path, total_file_events):
+def _set_datasource_total_events(timeline_id, file_path, total_file_events,
+                                 total_file_warnings=0):
     timeline = Timeline.query.get(timeline_id)
     for datasource in timeline.datasources:
         if datasource.get_file_on_disk == file_path:
             datasource.set_total_file_events(total_file_events)
+            datasource.set_total_file_warnings(total_file_warnings)
             return
     raise KeyError(f"No datasource find in the timeline with file_path: {file_path}")
 
@@ -667,7 +669,7 @@ def run_plaso(file_path, events, timeline_name, index_name, source_type, timelin
         "--output-format",
         "json",
         "--sections",
-        "events",
+        "events,warnings",
         file_path,
     ]
 
@@ -679,6 +681,9 @@ def run_plaso(file_path, events, timeline_name, index_name, source_type, timelin
         total_file_events = (
             storage_counters.get("storage_counters", {}).get("parsers", {}).get("total")
         )
+        warnings_by_parser = storage_counters.get("storage_counters", {}).get(
+            "warnings_by_parser", {})
+        total_file_warnings = sum(warnings_by_parser.values())
         if not total_file_events:
             raise RuntimeError("Not able to get total event count from Plaso file.")
     except subprocess.CalledProcessError as e:
@@ -693,7 +698,8 @@ def run_plaso(file_path, events, timeline_name, index_name, source_type, timelin
         logger.error("Error: {0!s}\n{1:s}".format(e, error_msg))
         return None
 
-    _set_datasource_total_events(timeline_id, file_path, total_file_events)
+    _set_datasource_total_events(timeline_id, file_path, total_file_events,
+                                 total_file_warnings)
     _set_datasource_status(timeline_id, file_path, "processing")
 
     try:
